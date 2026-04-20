@@ -1,0 +1,39 @@
+﻿version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sportlink_db
+    environment:
+      POSTGRES_DB: sportlink_db
+      POSTGRES_USER: sportlink_user
+      POSTGRES_PASSWORD: sportlink_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sportlink_backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://sportlink_user:sportlink_password@postgres:5432/sportlink_db
+    depends_on:
+      - postgres
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sportlink_frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
